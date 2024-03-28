@@ -1,0 +1,129 @@
+Sub Main()
+    
+   For Each ws In Worksheets
+   Dim WorksheetName As String
+    'set variable for ticker
+    Dim ticker_name As String
+    'set variable for total
+    Dim ticker_total As Double
+    'set variable for open
+    Dim ticker_open As Double
+    'set variable for close
+    Dim ticker_close As Double
+    'set varible for last row
+    Dim last_row As Long
+    'get the ws name
+    WorksheetName = ws.Name
+    'track location
+    Dim table As Integer
+    table = 2
+    last_row = ws.Cells(Rows.Count, 1).End(xlUp).Row
+    'loop thorough
+    For i = 2 To last_row
+        'check if previous ticker and current ticker are not the same
+        If ws.Cells(i - 1, 1).Value <> ws.Cells(i, 1).Value Then
+        ticker_open = ws.Cells(i, 3)
+        'check if next ticker and current ticker are not the same
+        ElseIf ws.Cells(i + 1, 1).Value <> ws.Cells(i, 1).Value Then
+            'set ticker name
+            ticker_name = ws.Cells(i, 1).Value
+            'set ticker total
+            ticker_total = ticker_total + ws.Cells(i, 7).Value
+            'set ticker close
+            ticker_close = ws.Cells(i, 6).Value
+            'difference between opening and closing
+            yearly_change = ticker_close - ticker_open
+            'percent change calculation between opening and closing
+            percent_change = ((ticker_close - ticker_open) / ticker_open)
+            'print yearly change in summary table
+            ws.Range("M" & table).Value = yearly_change
+            'print percent change in summary table
+            ws.Range("N" & table).Value = percent_change
+            ws.Columns("N:N").NumberFormat = "0.00%"
+            'print ticker name
+            ws.Range("J" & table).Value = ticker_name
+            'print ticker total
+            ws.Range("O" & table).Value = ticker_total
+            'print ticker open
+            ws.Range("K" & table).Value = ticker_open
+            'print ticker close
+            ws.Range("L" & table).Value = ticker_close
+            'add one to table
+            table = table + 1
+            'reset the ticker total
+            ticker_total = 0
+        'If cell following a row is same ticker
+            Else
+                'add to the ticker total
+                ticker_total = ticker_total + ws.Cells(i, 7).Value
+    End If
+    'Set Column Headers
+    ws.Cells(1, 10) = "Ticker"
+    ws.Cells(1, 18) = "Ticker"
+    ws.Cells(1, 15) = "Volume"
+    ws.Cells(1, 11) = "Ticker Open"
+    ws.Cells(1, 12) = "Ticker Close"
+    ws.Cells(1, 13) = "Yearly Change"
+    ws.Cells(1, 14) = "Percent Change"
+    ws.Cells(2, 17) = "Greatest % of Increase"
+    ws.Cells(3, 17) = "Greatest % of Decrease"
+    ws.Cells(4, 17) = "Greatest Total Volume"
+    ws.Cells(1, 19) = "Value"
+
+Next i
+    
+    'Next Table
+    LastRowTable = ws.Cells(Rows.Count, 10).End(xlUp).Row
+    
+        greatest_volume = ws.Cells(2, 15)
+        greatest_increase = ws.Cells(2, 14)
+        greatest_decrease = ws.Cells(2, 14)
+    
+    For j = 2 To LastRowTable
+    'Greatest Volume
+        If ws.Cells(j, 15).Value > greatest_volume Then
+        greatest_volume = ws.Cells(j, 15).Value
+        ws.Cells(4, 18).Value = ws.Cells(j, 10).Value
+        
+        End If
+    ws.Cells(4, 19).Value = Format(greatest_volume, "Scientific")
+        
+    'Greatest Increase
+        If ws.Cells(j, 14).Value > greatest_increase Then
+        greatest_increase = ws.Cells(j, 14).Value
+        ws.Cells(2, 18).Value = ws.Cells(j, 10).Value
+        
+        End If
+    ws.Cells(2, 19).Value = Format(greatest_increase, "Percent")
+        
+    'Greatest Decrease
+        If ws.Cells(j, 14).Value < greatest_decrease Then
+        greatest_decrease = ws.Cells(j, 14).Value
+        ws.Cells(3, 18).Value = ws.Cells(j, 10).Value
+        
+        End If
+    ws.Cells(3, 19).Value = Format(greatest_decrease, "Percent")
+    
+    'Conditional Formatting
+        If ws.Cells(j, 13).Value < 0 Then
+        ws.Cells(j, 13).Interior.ColorIndex = 3
+        ElseIf ws.Cells(j, 13).Value > 0 Then
+        ws.Cells(j, 13).Interior.ColorIndex = 4
+        
+        End If
+        
+        If ws.Cells(j, 14).Value < 0 Then
+        ws.Cells(j, 14).Interior.ColorIndex = 3
+        ElseIf ws.Cells(j, 14).Value > 0 Then
+        ws.Cells(j, 14).Interior.ColorIndex = 4
+        
+        End If
+
+Next j
+
+'adjust column width
+Worksheets(WorksheetName).Columns("A:Z").AutoFit
+
+Next ws
+    
+End Sub
